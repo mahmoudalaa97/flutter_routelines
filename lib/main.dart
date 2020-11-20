@@ -11,8 +11,8 @@ void main() => runApp(MaterialApp(
 const double CAMERA_ZOOM = 13;
 const double CAMERA_TILT = 0;
 const double CAMERA_BEARING = 30;
-const LatLng SOURCE_LOCATION = LatLng(42.7477863, -71.1699932);
-const LatLng DEST_LOCATION = LatLng(42.6871386, -71.2143403);
+const LatLng SOURCE_LOCATION = LatLng(30.009131, 31.288455);
+const LatLng DEST_LOCATION = LatLng(30.0089321,31.291151);
 
 class MapPage extends StatefulWidget {
   @override
@@ -30,8 +30,9 @@ class MapPageState extends State<MapPage> {
     // this is the key object - the PolylinePoints
     // which generates every polyline between start and finish
     PolylinePoints polylinePoints = PolylinePoints();
-    String googleAPIKey = "<YOUR_API_KEY>";
+    String googleAPIKey = "AIzaSyCRtivsBgvUare_z_4m9LqoKvXQ25humXE";
     // for my custom icons
+    BitmapDescriptor pinIcon;
     BitmapDescriptor sourceIcon;
     BitmapDescriptor destinationIcon;
 
@@ -42,6 +43,9 @@ class MapPageState extends State<MapPage> {
     }
 
     void setSourceAndDestinationIcons() async {
+
+      pinIcon= await BitmapDescriptor.fromAssetImage(
+          ImageConfiguration(devicePixelRatio:100), 'assets/ic_pin.png');
       sourceIcon = await BitmapDescriptor.fromAssetImage(
           ImageConfiguration(devicePixelRatio: 2.5), 'assets/driving_pin.png');
       destinationIcon = await BitmapDescriptor.fromAssetImage(
@@ -80,38 +84,52 @@ class MapPageState extends State<MapPage> {
         _markers.add(Marker(
             markerId: MarkerId('sourcePin'),
             position: SOURCE_LOCATION,
-            icon: sourceIcon));
+            icon: pinIcon));
         // destination pin
         _markers.add(Marker(
             markerId: MarkerId('destPin'),
             position: DEST_LOCATION,
-            icon: destinationIcon));
+            icon: pinIcon));
       });
     }
 
     setPolylines() async {
 
-        List<PointLatLng> result = await polylinePoints?.getRouteBetweenCoordinates(
-            googleAPIKey,
-            SOURCE_LOCATION.latitude,
-            SOURCE_LOCATION.longitude,
-            DEST_LOCATION.latitude,
-            DEST_LOCATION.longitude);
-        if (result.isNotEmpty) {
-          // loop through all PointLatLng points and convert them
+        PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
+            "AIzaSyCRtivsBgvUare_z_4m9LqoKvXQ25humXE",
+            PointLatLng(
+              SOURCE_LOCATION.latitude,
+              SOURCE_LOCATION.longitude,
+            ),
+          PointLatLng(
+              DEST_LOCATION.latitude,
+              DEST_LOCATION.longitude
+          ),
+
+        );
+        print("${result.status}");
+        // loop through all PointLatLng points and convert them
           // to a list of LatLng, required by the Polyline
-          result.forEach((PointLatLng point) {
+          result.points.forEach((PointLatLng point) {
+            print("${point.latitude},${point.longitude}");
             polylineCoordinates.add(LatLng(point.latitude, point.longitude));
           });
-        }
+
 
       setState(() {
           // create a Polyline instance
           // with an id, an RGB color and the list of LatLng pairs
           Polyline polyline = Polyline(
               polylineId: PolylineId("poly"),
-              color: Color.fromARGB(255, 40, 122, 198),
-              points: polylineCoordinates);
+              width: 2,
+
+              color: Color(0xff1ED761),
+              points: [
+                LatLng(30.009131, 31.288455),
+                LatLng(30.0089321,31.291151),
+                LatLng(30.0089321,31.291151),
+                LatLng(30.0089321,31.291151),
+              ]);
 
           // add the constructed polyline as a set of points
           // to the polyline set, which will eventually
